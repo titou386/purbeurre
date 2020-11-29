@@ -2,11 +2,11 @@ import mysql.connector
 from mysql.connector import errorcode
 
 
-class Database:
-    def __init__(self, host_db, user_db, password_db, database_db, db_type):
+class Mysql:
+    def __init__(self, host_db, user_db, password_db, database_db):
         self.db_type = db_type
         self.error_encountered = False
-        self.error_message = []
+        self.error_msgs = []
 
         try:
             cnx = mysql.connector.connect(
@@ -26,50 +26,58 @@ class Database:
 
         self.cursor = cnx.cursor()
 
-    def log(self, message):
-        if message == 'clear':
-            self.error_message = []
+    def error(self, msg):
+        if msg == 'clear':
+            self.error_msgs = []
             self.error_encountered = False
         else:
             self.error_encountered = True
-            self.error_message.append(message)
+            self.error_msgs.append(msg)
 
-    def execute(self, sql_command):
+    def execute(self, sql, values):
         try:
-            self.cursor.execute(sql_command)
+            self.cursor.execute(sql, values)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                self.log("Table already exists.")
+                self.error("Table already exists.")
             elif err.errno == errorcode.ER_NO_SUCH_TABLE_ERROR:
-                self.log("Table doesn't exist")
+                self.error("Table doesn't exist")
             elif err.errno == errorcode.ER_WRONG_COLUMN_NAME_ERROR:
-                self.log("Column doesn't exist")
-            self.log(err.msg)
-            self.log(sql_command)
+                self.error("Column doesn't exist")
+            self.error(err.msg)
+            self.error(sql.format(values))
         else:
             print("OK")
 
     def create_table(self, name, *col, **options):
+        values = ()
 
-        sql = "CREATE TABLE IF NOT EXIST {} (".format(name)
+        sql = "CREATE TABLE IF NOT EXIST {} ("
+        values.append(name)
         for i, x in enumerate(col):
             if i != 0:
                 sql += ', '
-            sql += x
+            sql += '{}'
+            values.append(x)
         sql += ')'
 
         for arg in options:
-            sql += ' {}={}'.format(arg.upper(), options[arg].upper())
+            sql += ' {}={}'
+            values.append(arg.upper())
+            values.append(options[arg].upper())
 
-        sql += ';'
-        self.execute(sql)
+        self.execute(sql, values)
 
     def insert(self, table, values_order, *values):  # values_order --> list, values --> scale
-        sql = "INSERT INTO {} (".format(table)
+        values = ()
+
+        sql = "INSERT INTO {} ("
+        values.append(table)
         for i, val_name in enumerate(values_order):
             if i != 0:
                 sql += ', '
-            sql += val_name
+            sql += '{}'
+            values.append(val_name)
         sql += ") VALUES "
 
         for j, line_vals in enumerate(values):
@@ -80,23 +88,30 @@ class Database:
                     sql += '('
                 if i != 0:
                     sql += ', '
-                sql += '\'{}\''.format(val)
+                sql += '\'{}\''
+                values.append(val)
             sql += ')'
 
-        sql += ';'
-        self.execute(sql)
+        self.execute(sql, values)
 
     def query(self, table, select='*', *where, **options):
-        sql = "SELECT {} FROM {}".format(select, table)
+        values = ()
+
+        sql = "SELECT {} FROM {}"
+        values.append(select)
+        values.append(table)
         for i, arg in enumerate(where):
             if i == 0:
                 sql += " WHERE"
-            sql += ' {}'.format(arg)
+            sql += ' {}'
+            values.append(arg)
 
         for key in options:
-            sql += ' {} {}'.format(key.upper(), options[key])
-        sql += ';'
-        self.execute(sql)
+            sql += ' {} {}'
+            values.append(key.upper())
+            values.append(options[key])
+
+        self.execute(sql, values)
 
     def update(self, table_name, set, where):
         pass
