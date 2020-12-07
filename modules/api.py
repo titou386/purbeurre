@@ -14,10 +14,10 @@ class OpenFoodFacts:
         self.categories = []
         self.nb_prod = nb_prod
         self.products = []
-        self.get_categoriesegories()
+        self.get_categories()
 
 
-    def get_categoriesegories(self):
+    def get_categories(self):
         self.categories = [None for e in range(self.nb_cat)]
 
         r = requester('https://fr.openfoodfacts.org/categories.json')
@@ -33,15 +33,12 @@ class OpenFoodFacts:
 
 
     def get_products(self):
-        if self.err is not None:
-            return
-
         for cat in self.categories:
             payload = {
                 'action': 'process',
                 'tagtype_0': 'categories',
                 'tag_contains_0': 'contains',
-                'tag_0': self.cat['id'],
+                'tag_0': cat['id'],
                 'tagtype_1': 'countries',
                 'tag_contains_1': 'contains',
                 'tag_1': 'France',
@@ -51,10 +48,10 @@ class OpenFoodFacts:
 
             r = requester('https://world.openfoodfacts.org/cgi/search.pl', params=payload)
 
-            self.products.append(r['products'])
+            self.products.append([prod for cat in r['products'] for prod in cat])
 
 
-def requester(self, url, **kwargs):
+def requester(url, **kwargs):
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
     else:
