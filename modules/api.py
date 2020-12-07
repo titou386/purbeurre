@@ -26,9 +26,13 @@ class OpenFoodFacts:
     def get_categories(self):
         """Method get_categories.
 
+<<<<<<< HEAD
         Retrieve from the API and fill 'categories' variable with
         a decreasing ordered list.
         """
+=======
+    def get_categories(self):
+>>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
         self.categories = [None for e in range(self.nb_cat)]
 
         r = requester('https://fr.openfoodfacts.org/categories.json')
@@ -43,10 +47,13 @@ class OpenFoodFacts:
                     break
 
     def get_products(self):
+<<<<<<< HEAD
         """Method get_products.
 
         Retrieve from the API and fill 'products' variable with a list.
         """
+=======
+>>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
         for cat in self.categories:
             payload = {
                 'action': 'process',
@@ -63,12 +70,19 @@ class OpenFoodFacts:
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
+<<<<<<< HEAD
             self.products.append([prod for cat in r['products']
                                   for prod in cat])
 
 
 def requester(url, **kwargs):
     """Similar to requests.get."""
+=======
+            self.products.append([prod for cat in r['products'] for prod in cat])
+
+
+def requester(url, **kwargs):
+>>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
     else:
