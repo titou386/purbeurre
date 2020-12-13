@@ -3,12 +3,13 @@
 import requests
 import json
 import logging
+from purbeurre.constants import MAX_CATEGORIES, MAX_PRODUCTS
 
 
 class OpenFoodFacts:
     """Retrieves data from the Open Food Facts API."""
 
-    def __init__(self, nb_cat, nb_prod):
+    def __init__(self):
         """Open Food Facts' contructor require 2 arguments.
 
         :param int nb_cat:
@@ -17,10 +18,7 @@ class OpenFoodFacts:
         :param int nb_prod:
             Defined how many products in each category should be retrieved
         """
-        self.nb_cat = nb_cat
         self.categories = []
-        self.nb_prod = nb_prod
-        self.products = []
         self.get_categories()
 
     def get_categories(self):
@@ -29,7 +27,7 @@ class OpenFoodFacts:
         Retrieve from the API and fill 'categories' variable with
         a decreasing ordered list.
         """
-        self.categories = [None for e in range(self.nb_cat)]
+        self.categories = [None for e in range(MAX_CATEGORIES)]
 
         r = requester('https://fr.openfoodfacts.org/categories.json')
 
@@ -47,6 +45,7 @@ class OpenFoodFacts:
 
         Retrieve from the API and fill 'products' variable with a list.
         """
+        data = []
         for cat in self.categories:
             payload = {
                 'action': 'process',
@@ -56,15 +55,15 @@ class OpenFoodFacts:
                 'tagtype_1': 'countries',
                 'tag_contains_1': 'contains',
                 'tag_1': 'France',
-                'page_size': self.nb_prod,
+                'page_size': MAX_PRODUCTS,
                 'json': 'true'
             }
 
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
-            self.products.append([prod for cat in r['products']
-                                  for prod in cat])
+            data.append(r['products'])
+        return [prod for cat in data for prod in cat]
 
 
 def requester(url, **kwargs):
