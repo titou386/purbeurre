@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 """api.py."""
 import requests
 import json
 import logging
+from purbeurre.constants import MAX_CATEGORIES, MAX_PRODUCTS
 
 
 class OpenFoodFacts:
     """Retrieves data from the Open Food Facts API."""
 
-    def __init__(self, nb_cat, nb_prod):
+    def __init__(self):
         """Open Food Facts' contructor require 2 arguments.
 
         :param int nb_cat:
@@ -17,23 +17,16 @@ class OpenFoodFacts:
         :param int nb_prod:
             Defined how many products in each category should be retrieved
         """
-        self.nb_cat = nb_cat
         self.categories = []
-        self.nb_prod = nb_prod
-        self.products = []
         self.get_categories()
 
     def get_categories(self):
         """Method get_categories.
 
-<<<<<<< HEAD
         Retrieve from the API and fill 'categories' variable with
         a decreasing ordered list.
         """
-=======
-    def get_categories(self):
->>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
-        self.categories = [None for e in range(self.nb_cat)]
+        self.categories = [None for e in range(MAX_CATEGORIES)]
 
         r = requester('https://fr.openfoodfacts.org/categories.json')
 
@@ -47,14 +40,13 @@ class OpenFoodFacts:
                     break
 
     def get_products(self):
-<<<<<<< HEAD
         """Method get_products.
 
         Retrieve from the API and fill 'products' variable with a list.
         """
-=======
->>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
-        for cat in self.categories:
+#        data = []
+        if self.categories:
+            cat = self.categories.pop(0)
             payload = {
                 'action': 'process',
                 'tagtype_0': 'categories',
@@ -63,26 +55,22 @@ class OpenFoodFacts:
                 'tagtype_1': 'countries',
                 'tag_contains_1': 'contains',
                 'tag_1': 'France',
-                'page_size': self.nb_prod,
+                'page_size': MAX_PRODUCTS,
                 'json': 'true'
             }
 
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
-<<<<<<< HEAD
-            self.products.append([prod for cat in r['products']
-                                  for prod in cat])
+#            data.append(r['products'])
+#        return [prod for cat in data for prod in cat]
+            return r['products']
+        else:
+            return None
 
 
 def requester(url, **kwargs):
     """Similar to requests.get."""
-=======
-            self.products.append([prod for cat in r['products'] for prod in cat])
-
-
-def requester(url, **kwargs):
->>>>>>> 226d6591454944b97fffef0eca7d92d8e9ab3fd8
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
     else:
@@ -92,6 +80,6 @@ def requester(url, **kwargs):
         return json.loads(r.text)
     else:
         logging.error('Une erreur s\'est produite \
-                      lors de la récupération des données')
-        logging.error('Code erreur HTTP : ' + r.status_code)
+lors de la récupération des données')
+        logging.error('Code erreur HTTP : {}'.format(r.status_code))
         return None
