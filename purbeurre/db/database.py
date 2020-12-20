@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """database.py."""
 import mysql.connector
 from mysql.connector import errorcode
@@ -31,15 +30,15 @@ class Mysql:
                 password=DB_PASSWORD,
                 database=DB_NAME
             )
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        except mysql.connector.Error as e:
+            if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 logging.error("Something is wrong \
                     with your user name or password")
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            elif e.errno == errorcode.ER_BAD_DB_ERROR:
                 logging.error("Database does not exist")
             else:
                 logging.error("Something went wrong at the connection :")
-                logging.error(err)
+                logging.error(e)
             exit(1)
 
         self.cursor = self.cnx.cursor()
@@ -52,35 +51,26 @@ class Mysql:
             else:
                 self.cursor.execute(sql)
 
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+        except mysql.connector.Error as e:
+            if e.errno == errorcode.ER_TABLE_EXISTS_ERROR:
                 logging.error("Table already exists.")
 #            elif err.errno == errorcode.ER_NO_SUCH_TABLE_ERROR:
 #                logging.error("Table doesn't exist")
 #            elif err.errno == errorcode.ER_WRONG_COLUMN_NAME_ERROR:
 #                logging.error("Column doesn't exist")
             else:
-                logging.error(err.msg)
+                logging.error(e.msg)
             logging.error(sql.format(values))
-            return -1
+            return False
         else:
             logging.info("Succeeded")
             logging.info(sql.format(values))
-            return 0
+            return True
 
     def apply_structure(self):
         """Delete table & apply table structure from structure.sql file."""
         with open('purbeurre/db/structure.sql', 'r') as file:
             lines = file.read()
-            lst = lines.split(' ')
-            tables = []
-            while len(lst) != 0:
-                if 'TABLE' == lst.pop(0):
-                    tables.append(lst.pop(0))
-
-            tables.reverse()
-            for table in tables:
-                self.execute("DROP TABLE IF EXISTS " + table)
 
             lst = lines.split(';')
             lst.pop(len(lst) - 1)
@@ -104,13 +94,17 @@ class Mysql:
         sql = sql.format(table, ', '.join([key for key in values]),
                          data_quantity)
 
-        r = self.exists(table, values)
+        r = self.get(table, values)
         if r:
-            return r
+            return r[0]
         else:
             self.execute(sql, data)
             self.cnx.commit()
-            return self.exists(table, values)
+            r = self.get(table, values)
+            if r:
+                return r[0]
+            else:
+                return None
 
     def query(self, table, values, select='*', **options):
         """Query to database.
@@ -147,21 +141,26 @@ class Mysql:
                 sql += " OFFSET {}".format(options['offset'])
 
         self.execute(sql, values)
-        self.results = self.cursor.fetchall()
+        try:
+            return self.cursor.fetchall()
+        except Exception as e:
+            logging.error(sql, values)
+            logging.error(e.msg)
+            return None
 
-    def exists(self, table, values):
-        """Test if these values are recorded in the table.
+    def get(self, table, values):
+        """Simple function query the data.
 
         if values were found the id is returned,
         if not None is returned
         """
         data = tuple([values[key] for key in values])
         where = " AND ".join([key + "=%s" for key in values])
-        self.query(table, data, where=where)
-        if len(self.results) == 0:
-            return None
+        results = self.query(table, data, where=where)
+        if results:
+            return results[0]
         else:
-            return self.results[0][0]
+            return None
 
     def update(self, table, set, where):
         """Not yet implemented."""

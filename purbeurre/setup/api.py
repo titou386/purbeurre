@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """api.py."""
 import requests
 import json
@@ -45,8 +44,9 @@ class OpenFoodFacts:
 
         Retrieve from the API and fill 'products' variable with a list.
         """
-        data = []
-        for cat in self.categories:
+#        data = []
+        if self.categories:
+            cat = self.categories.pop(0)
             payload = {
                 'action': 'process',
                 'tagtype_0': 'categories',
@@ -62,8 +62,11 @@ class OpenFoodFacts:
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
-            data.append(r['products'])
-        return [prod for cat in data for prod in cat]
+#            data.append(r['products'])
+#        return [prod for cat in data for prod in cat]
+            return r['products']
+        else:
+            return None
 
 
 def requester(url, **kwargs):
@@ -77,6 +80,6 @@ def requester(url, **kwargs):
         return json.loads(r.text)
     else:
         logging.error('Une erreur s\'est produite \
-                      lors de la récupération des données')
-        logging.error('Code erreur HTTP : ' + r.status_code)
+lors de la récupération des données')
+        logging.error('Code erreur HTTP : {}'.format(r.status_code))
         return None

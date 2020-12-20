@@ -1,9 +1,10 @@
 """Constants for 'Purbeurre' application."""
+import os
 
-DB_USER = 'student'
-DB_PASSWORD = 'gggg'
-DB_HOST = 'nextcloud.lan'
-DB_NAME = 'PurBeurre'
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_NAME = os.getenv('DB_NAME')
 
-MAX_CATEGORIES = 5
-MAX_PRODUCTS = 3
+MAX_CATEGORIES = 15
+MAX_PRODUCTS = 1000
