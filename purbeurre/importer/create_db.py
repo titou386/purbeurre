@@ -1,12 +1,12 @@
 """Setup function for purbeurre."""
 from purbeurre.db.manager import Manager
-from purbeurre.setup.api import OpenFoodFacts
+from purbeurre.importer.api import OpenFoodFacts
 
 
 def main():
     """Setup main."""
     manager = Manager()
-    manager.setup()
+    manager.create_db()
 
     client = OpenFoodFacts()
     while client.categories:

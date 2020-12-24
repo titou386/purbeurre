@@ -8,3 +8,17 @@ DB_NAME = os.getenv('DB_NAME')
 
 MAX_CATEGORIES = 15
 MAX_PRODUCTS = 1000
+
+HOMEPAGE = "homepage"
+
+PRODUCT_SEARCH = "product_search"
+CATEGORY_SEARCH = "category_search"
+
+PRODUCT_SEARCH_RESULT = "product_search_result"
+CATEGORY_SEARCH_RESULT = "category_search_result"
+
+PRODUCT_DETAIL = "product_detail"
+
+SAVED_SUBSITITUTION = "saved_substitution"
+
+EXIT = "exit"

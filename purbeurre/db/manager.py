@@ -8,7 +8,7 @@ class Manager:
         """Create an mysql instance."""
         self.db = purbeurre.db.database.Mysql()
 
-    def setup(self):
+    def create_db(self):
         """Database initialisation."""
         self.db.apply_structure()
 
@@ -66,6 +66,7 @@ class Manager:
         return self.db.insert("category", {'name': category_name})
 
     def insert_nutriments(self, product_id, product_dict):
+        """Insert one line in nutriments table."""
         values = {}
         for key in ('nutriscore_grade', 'nutriments:fat_100g',
                     'nutriments:saturated-fat_100g', 'nutriments:sugars_100g',
