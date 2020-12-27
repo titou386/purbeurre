@@ -21,13 +21,13 @@ Choisissez une option :
 
 1 - Rechercher un produit par nom
 2 - Rechercher une categorie
-3 - Regarder mes substitus sauvegardés
+3 - Afficher mes substituts sauvegardés
 q - Quitter
 
 """)
 
     def get_next_page(self):
-        option = input("option? ")
+        option = input("Choix? ")
         if option == "1":
             return PRODUCT_SEARCH
         elif option == "2":

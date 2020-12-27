@@ -13,10 +13,10 @@ class SavedSubstituteView:
     def display(self):
         os.system('clear')
         print("""
-# Page des substitus sauvegardés
+# Page des subtituts sauvegardés
 """)
         if not self.results:
-            print("Aucun substitu sauvegardé pour l'instant.\n")
+            print("Aucun substitut sauvegardé pour l'instant.\n")
             return
 
         for i in range(len(self.results)):
@@ -25,14 +25,14 @@ class SavedSubstituteView:
 
 
     def get_next_page(self):
-        print("h - Page d'acceuil q - Quitter")
+        print("h - Page d'acceuil   q - Quitter")
         if self.results:
-            print("s - pour supprimer un substitut")
+            print("s - Supprimer un substitut")
         option = input("option? ")
         if option == "h":
             return (HOMEPAGE, None)
         elif option == "s" and self.results:
-            index = input("Numéro ? ")
+            index = input("Numéro? ")
             try:
                 index = int(index)
                 if index >= 0 or index < len(self.results):
