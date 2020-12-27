@@ -22,8 +22,8 @@ CREATE TABLE product (
 )
 ENGINE=InnoDB CHARSET=utf8;
 
-CREATE TABLE nutriments (
-    product_id SMALLINT UNSIGNED,
+CREATE TABLE nutriment (
+    product_id SMALLINT UNSIGNED UNIQUE,
     nova_group CHAR(1),
     nutriscore_grade CHAR(1),
     fat_100g FLOAT,
@@ -31,28 +31,23 @@ CREATE TABLE nutriments (
     salt_100g FLOAT,
     sugars_100g FLOAT,
     CONSTRAINT prod_nutri FOREIGN KEY (product_id) REFERENCES product(id)
-    ON DELETE SET NULL ON UPDATE CASCADE
 )
 ENGINE=InnoDB CHARSET=utf8;
 
 CREATE TABLE product_category (
     product_id SMALLINT UNSIGNED,
     category_id SMALLINT UNSIGNED,
-    CONSTRAINT for_key_1 FOREIGN KEY (product_id) REFERENCES product(id)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT for_key_2 FOREIGN KEY (category_id) REFERENCES category(id)
-    ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT for_key_1 FOREIGN KEY (product_id) REFERENCES product(id),
+    CONSTRAINT for_key_2 FOREIGN KEY (category_id) REFERENCES category(id),
     UNIQUE uni_prod_cat (product_id, category_id)
 )
 ENGINE=InnoDB CHARSET=utf8;
 
 CREATE TABLE substitute (
-    prod_id_orig SMALLINT UNSIGNED,
-    prod_id_subs SMALLINT UNSIGNED,
-    CONSTRAINT for_key_3 FOREIGN KEY (prod_id_orig) REFERENCES product(id)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-    CONSTRAINT for_key_4 FOREIGN KEY (prod_id_subs) REFERENCES product(id)
-    ON DELETE SET NULL ON UPDATE CASCADE,
-    UNIQUE INDEX unique_substitute(prod_id_orig, prod_id_subs)
+    product_id SMALLINT UNSIGNED UNIQUE,
+    subs_product_id SMALLINT UNSIGNED,
+    CONSTRAINT for_key_4 FOREIGN KEY (product_id) REFERENCES product(id),
+    CONSTRAINT for_key_5 FOREIGN KEY (subs_product_id) REFERENCES product(id),
+    UNIQUE INDEX unique_substitute(product_id, subs_product_id)
 )
 ENGINE=InnoDB CHARSET=utf8;

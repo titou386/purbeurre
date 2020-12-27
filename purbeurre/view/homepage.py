@@ -3,14 +3,14 @@ from purbeurre.constants import \
     PRODUCT_SEARCH,             \
     CATEGORY_SEARCH,            \
     HOMEPAGE,                   \
-    SAVED_SUBSITITUTE,          \
+    SAVED_SUBSITITUTE,        \
     EXIT
 
 
 
 class HomePageView:
 
-    def display():
+    def display(self):
         os.system('clear')
         print("""
 # Page d'accueil
@@ -22,7 +22,7 @@ Choisissez une option :
 1 - Rechercher un produit par nom
 2 - Rechercher une categorie
 3 - Regarder mes substitus sauvegardés
-Q - Quitter
+q - Quitter
 
 """)
 

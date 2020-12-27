@@ -122,12 +122,19 @@ class Mysql:
         else:
             sql = "SELECT {} FROM {}".format(select, table)
 
+        if 'join' in options and 'on' in options:
+            sql += " JOIN {} ON {}".format(options['join'], options['on'])
+
         if 'where' in options:
             sql += " WHERE {}".format(options['where'])
 
-        if 'in' in options:
-            data_quantity = ', '.join(['%s' for e in range(len(values))])
-            sql += " IN {}".format(data_quantity)
+            if 'like' in options:
+                data_quantity = ' AND '.join(['%s' for e in range(len(values))])
+                sql += " LIKE {}".format(data_quantity)
+
+            if 'inside' in options:
+                data_quantity = ', '.join(['%s' for e in range(len(values))])
+                sql += " IN ({})".format(data_quantity)
 
         if 'order_by' in options:
             if 'direction' not in options:
@@ -148,7 +155,7 @@ class Mysql:
             logging.error(e.msg)
             return None
 
-    def get(self, table, values):
+    def get_all(self, table, values):
         """Simple function query the data.
 
         if values were found the id is returned,
@@ -157,15 +164,20 @@ class Mysql:
         data = tuple([values[key] for key in values])
         where = " AND ".join([key + "=%s" for key in values])
         results = self.query(table, data, where=where)
-        if results:
-            return results[0]
-        else:
-            return None
+        return results
 
-    def update(self, table, set, where):
-        """Not yet implemented."""
-        pass
+    def get(self, table, values):
+        data = tuple([values[key] for key in values])
+        where = " AND ".join([key + "=%s" for key in values])
+        results = self.query(table, data, where=where, limit=1)
+        return results[0] if results else None
 
-    def delete(self, table, where):
-        """Not yet implemented."""
-        pass
+    def delete(self, table, values):
+        data = tuple([values[key] for key in values])
+        where = " AND ".join([key + "=%s" for key in values])
+        sql = "DELETE FROM {} WHERE {}".format(table, where)
+        self.execute(sql, data)
+        self.cnx.commit()
+
+    def get_description(self):
+        return [col[0] for col in self.cursor.description]

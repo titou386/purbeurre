@@ -1,4 +1,5 @@
 import purbeurre.db.database
+import logging
 
 
 class Manager:
@@ -34,7 +35,7 @@ class Manager:
         product_id = self.db.insert("product", values)
         if not product_id:
             return
-        self.insert_nutriments(product_id, product_dict)
+        self.insert_nutriment(product_id, product_dict)
 
         """Some tags are wrongly formatted"""
         if "categories_old" in product_dict:
@@ -65,7 +66,7 @@ class Manager:
         """Insert one category in database."""
         return self.db.insert("category", {'name': category_name})
 
-    def insert_nutriments(self, product_id, product_dict):
+    def insert_nutriment(self, product_id, product_dict):
         """Insert one line in nutriments table."""
         values = {}
         for key in ('nutriscore_grade', 'nutriments:fat_100g',
@@ -83,7 +84,85 @@ class Manager:
                 except KeyError:
                     pass
         values['product_id'] = product_id
-        self.db.insert("nutriments", values)
+        self.db.insert("nutriment", values)
+
+    def search_category_name(self, search):
+        value = ["%{}%".format(search)]
+        return self.db.query("category", value, where="name", like=True)
+
+    def delete_substitute_id(self, product_id):
+        self.db.delete('substitute',
+                       {'product_id': product_id})
+
+    def get_substitute_product_id(self, product_id):
+        cat = [i[0] for i in self.db.query('product_category',
+                                           (product_id,),
+                                           select='category_id',
+                                           where='product_id=%s')]
+
+        prod = [p[0] for p in self.db.query('product_category', cat,
+                                            select='product_id',
+                                            where='category_id',
+                                            inside='True')]
+
+        while prod.count(product_id):
+            prod.remove(product_id)
+
+        occurence = [[] for c in cat]
+
+        for p in prod:
+            occurence[prod.count(p) - 1].append(p)
+            while prod.count(p):
+                prod.remove(p)
+
+        index = len(occurence) - 1
+        while not occurence[index]:
+            index -= 1
+        return self.db.query('product', tuple(occurence[index]),
+                             join="nutriment",
+                             on="product.id = nutriment.product_id",
+                             where="nutriment.nutriscore_grade IS NOT NULL AND nutriment.product_id",
+                             inside='True',
+                             order_by='nutriscore_grade, nova_group',
+                             limit=1)[0]
+
+    def product_in_category(self, category_id):
+        return self.db.query("product",
+                             (category_id,),
+                             select="product.id, product.product_name",
+                             join="product_category",
+                             on="product.id = product_category.product_id",
+                             where="product_category.category_id=%s")
+
+    def search_product_name(self, search):
+        value = ["%{}%".format(search)]
+        return self.db.query("product", value, where="product_name", like=True)
+
+    def product_id_detail(self, product_id):
+        return self.db.query("product",
+                             (product_id,),
+                             join="nutriment",
+                             on="product.id = nutriment.product_id",
+                             where="product.id=%s")[0]
+
+    def save_substitute(self, product_id, substitute_id):
+        self.db.insert('substitute',
+                       {'product_id': product_id,
+                        'subs_product_id': substitute_id})
+
+    def saved_substitute(self):
+        sql = """
+select b.id, b.product_name, c.id, c.product_name
+from substitute a
+join product b on a.product_id = b.id
+join product c on a.subs_product_id = c.id"""
+        self.db.execute(sql)
+        try:
+            return self.db.cursor.fetchall()
+        except Exception as e:
+            logging.error(sql)
+            logging.error(e.msg)
+            return None
 
 
 def has_coluns(text):
@@ -92,3 +171,11 @@ def has_coluns(text):
 
 def sql_formater(text):
     return text.replace('-', '_')
+
+def list_to_dict(key_lst, value_lst):
+    if len(key_lst) != len(value_lst):
+        return None
+    d = {}
+    for i in range(len(key_lst)):
+        d[key_lst[i]] = value_lst[i]
+    return d

@@ -19,6 +19,6 @@ CATEGORY_SEARCH_RESULT = "category_search_result"
 
 PRODUCT_DETAIL = "product_detail"
 
-SAVED_SUBSITITUTION = "saved_substitution"
+SAVED_SUBSITITUTE = "saved_substitute"
 
 EXIT = "exit"

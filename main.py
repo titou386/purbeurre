@@ -1,5 +1,6 @@
 """Purbeurre substitution application for OpenClassRooms."""
-from purbeurre.importer.create_db import main
+import purbeurre.controller
 
 if __name__ == '__main__':
-    main()
+    control = purbeurre.controller.Controller()
+    control.run()

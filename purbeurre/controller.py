@@ -1,12 +1,12 @@
 from purbeurre.db.manager import Manager
 
-from purbeurre.view.homepage import HomepageView
+from purbeurre.view.homepage import HomePageView
 from purbeurre.view.product_search import ProductSearchView
 from purbeurre.view.category_search import CategorySearchView
 from purbeurre.view.product_search_result import ProductSearchResultView
-from purbeurre.view.categoty_search_result import CategorySearchResultView
+from purbeurre.view.category_search_result import CategorySearchResultView
 from purbeurre.view.product_detail import ProductDetailView
-from purbeurre.view.saved_substitution import SavedSubstitutionView
+from purbeurre.view.saved_substitute import SavedSubstituteView
 from purbeurre.view.exit import ExitView
 
 
@@ -17,7 +17,7 @@ from purbeurre.constants import \
     PRODUCT_SEARCH_RESULT,      \
     CATEGORY_SEARCH_RESULT,     \
     PRODUCT_DETAIL,             \
-    SAVED_SUBSITITUTION,        \
+    SAVED_SUBSITITUTE,          \
     EXIT
 
 
@@ -36,12 +36,12 @@ class Controller:
     def run(self):
         while self.running:
             if self.page == HOMEPAGE:
-                view = HomepageView()
+                view = HomePageView()
                 view.display()
                 self.page = view.get_next_page()
 
             elif self.page == PRODUCT_SEARCH:
-                self.type_search = self.page
+                self.search_type = self.page
                 self.category_id = None
                 self.product_id = None
                 view = ProductSearchView()
@@ -49,7 +49,7 @@ class Controller:
                 self.page, self.input = view.get_next_page()
 
             elif self.page == CATEGORY_SEARCH:
-                self.type_search = self.page
+                self.search_type = self.page
                 self.category_id = None
                 self.product_id = None
                 view = CategorySearchView()
@@ -60,31 +60,41 @@ class Controller:
                 self.category_id = None
                 self.product_id = None
                 results = self.manager.search_category_name(self.input)
-                view = CategorySearchResultView(results)
+                view = CategorySearchResultView([r[1] for r in results])
                 view.display()
-                self.page, self.category_id = view.get_next_page()
+                self.page, option = view.get_next_page()
+                if option or option == 0:
+                    self.category_id = results[option][0]
 
             elif self.page == PRODUCT_SEARCH_RESULT:
                 self.product_id = None
                 if self.category_id:
                     results = self.manager.product_in_category(self.category_id)
+                    view = ProductSearchResultView([r[1] for r in results])
                 else:
                     results = self.manager.search_product_name(self.input)
-                view = ProductSearchResultView(results)
+                    view = ProductSearchResultView([r[2] for r in results])
                 view.display()
-                self.page, self.product_id = view.get_next_page()
+                self.page, option = view.get_next_page()
+                if option or option == 0:
+                    self.product_id = results[option][0]
 
             elif self.page == PRODUCT_DETAIL:
                 product = self.manager.product_id_detail(self.product_id)
-                substitute = self.manager.substitute_product_id(self.product_id)
+                substitute = self.manager.get_substitute_product_id(self.product_id)
                 view = ProductDetailView(product, substitute)
                 view.display()
-                self.page = view.get_next_page()
+                self.page, option = view.get_next_page()
+                if option == 'save':
+                    self.manager.save_substitute(product[0], substitute[0])
 
-            elif self.page == SAVED_SUBSITITUTION:
-                view = SavedSubstitutionView()
+            elif self.page == SAVED_SUBSITITUTE:
+                results = self.manager.saved_substitute()
+                view = SavedSubstituteView(results)
                 view.display()
-                self.page, self.input = view.get_next_page()
+                self.page, value = view.get_next_page()
+                if value or value == 0:
+                    self.manager.delete_substitute_id(results[value][0])
 
             elif self.page == EXIT:
                 self.running = False
@@ -93,10 +103,10 @@ class Controller:
 
             elif self.page == "previous_page":
                 if self.product_id:
-                    self.page == PRODUCT_SEARCH_RESULT
+                    self.page = PRODUCT_SEARCH_RESULT
                 elif self.category_id:
-                    self.page == CATEGORY_SEARCH
+                    self.page = CATEGORY_SEARCH_RESULT
                 elif self.search_type:
-                    self.page == self.search_type
+                    self.page = self.search_type
                 else:
-                    self.page == HOMEPAGE
+                    self.page = HOMEPAGE

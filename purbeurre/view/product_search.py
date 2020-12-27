@@ -1,11 +1,12 @@
 import os
+
 from purbeurre.constants import \
     HOMEPAGE,                   \
     PRODUCT_SEARCH_RESULT,      \
     EXIT
 
 
-class SearchProductView:
+class ProductSearchView:
 
     def display(self):
         os.system('clear')
@@ -19,9 +20,9 @@ q! - Quitter
 
     def get_next_page(self):
         option = input("Produit? ")
-        if option == "h!" or option == "H!":
+        if option == "h!":
             return (HOMEPAGE, None)
-        elif option == "q!" or option == "Q!":
-            return EXIT
+        elif option == "q!":
+            return (EXIT, None)
         else:
             return (PRODUCT_SEARCH_RESULT, option)

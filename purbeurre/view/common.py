@@ -11,8 +11,11 @@ class GenericFormatting:
         self.term_colulns = os.get_terminal_size().lines
 
     def format_results(self, iterable):
-        os.system('clear')
-        self.get_size()
+        if not iterable:
+            print("Aucun résultat à votre recherche")
+            return
+
+        self.get_terminal_size()
 
         narrowest = min(len(x) for x in iterable)
         nb_col = self.term_columns // (narrowest + 8)
@@ -41,4 +44,4 @@ class GenericFormatting:
                     continue
                 print("%*d- %-*s" % (3, index, col_widths[col] - 6, iterable[index]), end='')
             print()
-
+            
