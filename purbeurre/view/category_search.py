@@ -1,3 +1,4 @@
+"""Category search page."""
 import os
 from purbeurre.constants import \
     HOMEPAGE,                   \
@@ -6,18 +7,21 @@ from purbeurre.constants import \
 
 
 class CategorySearchView:
+    """Category search class."""
 
     def display(self):
+        """Display the page."""
         os.system('clear')
         print("""
 # Page de recherche de categories
 
-h! - Page d'acceuil
+h! - Page d'accueil
 q! - Quitter
 
 """)
 
     def get_next_page(self):
+        """Determine the next page."""
         option = input("Produit? ")
         if option == "h!":
             return (HOMEPAGE, None)

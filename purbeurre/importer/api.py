@@ -9,14 +9,7 @@ class OpenFoodFacts:
     """Retrieves data from the Open Food Facts API."""
 
     def __init__(self):
-        """Open Food Facts' contructor require 2 arguments.
-
-        :param int nb_cat:
-            Defined how many categories should be retrieved
-
-        :param int nb_prod:
-            Defined how many products in each category should be retrieved
-        """
+        """Open Food Facts' contructor require 2 arguments."""
         self.categories = []
         self.get_categories()
 
@@ -44,7 +37,6 @@ class OpenFoodFacts:
 
         Retrieve from the API and fill 'products' variable with a list.
         """
-#        data = []
         if self.categories:
             cat = self.categories.pop(0)
             payload = {
@@ -62,15 +54,23 @@ class OpenFoodFacts:
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
-#            data.append(r['products'])
-#        return [prod for cat in data for prod in cat]
             return r['products']
         else:
             return None
 
 
 def requester(url, **kwargs):
-    """Similar to requests.get."""
+    """Similar to requests.get.
+
+    Parameters:
+        url(str): url with http://
+
+        parameter named:
+            params(key)(str) take same paramaters than requests
+
+    Returns:
+        dict: json converted
+    """
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
     else:

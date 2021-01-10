@@ -1,38 +1,37 @@
+"""Product search class page."""
 import os
 from purbeurre.view.common import GenericFormatting
 from purbeurre.constants import \
-    HOMEPAGE,               \
-    PRODUCT_DETAIL, \
+    HOMEPAGE,                   \
+    PRODUCT_DETAIL,             \
+    PREVIOUS_PAGE,              \
     EXIT
 
 
 class ProductSearchResultView(GenericFormatting):
+    """Product search result class."""
 
-    def __init__(self, results):
-        self.results = results
-
-    def display(self):
+    def display(self, results):
+        """Display the page."""
         os.system('clear')
-        print("""
-# Page de résultat des produits :
-""")
-        self.format_results(self.results)
+        print("# Page de résultat des produits :\n")
+        self.format_results(results)
 
-    def get_next_page(self):
-        print()
+    def get_next_page(self, max):
+        """Determine the next page."""
         while True:
-            print("""h - Page d'acceuil   r - retour   q - Quitter""")
+            print("\nh - Page d'accueil   r - retour   q - Quitter")
             option = input("Choix? ")
             if option == 'h':
                 return (HOMEPAGE, None)
             elif option == 'r':
-                return ("previous_page", None)
+                return (PREVIOUS_PAGE, None)
             elif option == 'q':
                 return (EXIT, None)
             else:
                 try:
                     option = int(option)
-                    if option >= 0 and option < len(self.results):
+                    if option >= 0 and option < max:
                         return (PRODUCT_DETAIL, option)
                 except ValueError:
                     pass

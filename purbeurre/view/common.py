@@ -1,20 +1,28 @@
+"""Common methodes to pages."""
 import os
 
+
 class GenericFormatting:
+    """Fomatting results in terminal."""
 
     def __init__(self):
+        """Constructor."""
         self.term_columns = 0
-        self.term_lines = 0
 
     def get_terminal_size(self):
+        """Determine and fill values terminal width and height."""
         self.term_columns = os.get_terminal_size().columns
-        self.term_colulns = os.get_terminal_size().lines
 
     def format_results(self, iterable):
-        if not iterable:
-            print("Aucun résultat à votre recherche")
-            return
+        """Try to display on a maximum of columns.
 
+        Parameters:
+            irerable(list): A list of str.
+        """
+        if not iterable:
+            print("\nAucun résultat à votre recherche")
+            return
+        iterable = [i.replace('\n', ' ') for i in iterable]
         self.get_terminal_size()
 
         narrowest = min(len(x) for x in iterable)
@@ -42,6 +50,6 @@ class GenericFormatting:
                 index = col * nb_lines + line
                 if index >= len(iterable):
                     continue
-                print("%*d- %-*s" % (3, index, col_widths[col] - 6, iterable[index]), end='')
+                print("%*d- %-*s" % (3, index, col_widths[col] - 6,
+                      iterable[index]), end='')
             print()
-            

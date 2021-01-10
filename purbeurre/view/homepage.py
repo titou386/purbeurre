@@ -1,3 +1,4 @@
+"""Homepage."""
 import os
 from purbeurre.constants import \
     PRODUCT_SEARCH,             \
@@ -7,10 +8,11 @@ from purbeurre.constants import \
     EXIT
 
 
-
 class HomePageView:
+    """Home page class."""
 
     def display(self):
+        """Display the page."""
         os.system('clear')
         print("""
 # Page d'accueil
@@ -27,6 +29,7 @@ q - Quitter
 """)
 
     def get_next_page(self):
+        """Determine the next page."""
         option = input("Choix? ")
         if option == "1":
             return PRODUCT_SEARCH
