@@ -18,6 +18,8 @@ class OpenFoodFacts:
 
         Retrieve from the API and fill 'categories' variable with
         a decreasing ordered list.
+        Returns:
+            Nothing (fill up self.categories)
         """
         self.categories = [None for e in range(MAX_CATEGORIES)]
 
@@ -36,8 +38,11 @@ class OpenFoodFacts:
         """Method get_products.
 
         Retrieve from the API and fill 'products' variable with a list.
+        Returns:
+            Dict value if it succeeded
+            None if it failed
         """
-        if self.categories:
+        try:
             cat = self.categories.pop(0)
             payload = {
                 'action': 'process',
@@ -55,7 +60,8 @@ class OpenFoodFacts:
                           params=payload)
 
             return r['products']
-        else:
+        except(IndexError, TypeError) as e:
+            logging.error('api.py:get_products():{}'.format(e))
             return None
 
 
@@ -70,6 +76,7 @@ def requester(url, **kwargs):
 
     Returns:
         dict: json converted
+        None if it failed
     """
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
@@ -79,7 +86,8 @@ def requester(url, **kwargs):
     if r.ok:
         return json.loads(r.text)
     else:
-        logging.error('Une erreur s\'est produite \
+        logging.error('api.py:requester():Une erreur s\'est produite \
 lors de la récupération des données')
-        logging.error('Code erreur HTTP : {}'.format(r.status_code))
+        logging.error('api.py:requester():Code erreur HTTP : {}'.
+                      format(r.status_code))
         return None

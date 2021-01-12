@@ -11,8 +11,9 @@ def main():
     client = OpenFoodFacts()
     while client.categories:
         prods_dict_lst = client.get_products()
-        for product_dict in prods_dict_lst:
-            manager.insert_product(product_dict)
+        if prods_dict_lst:
+            for product_dict in prods_dict_lst:
+                manager.insert_product(product_dict)
 
 
 if __name__ == "__main__":

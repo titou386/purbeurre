@@ -140,10 +140,12 @@ class Controller:
 
             elif self.page == PREVIOUS_PAGE:
                 if self.substitute_id and not self.input:
-                    self.page = HOMEPAGE
+                    self.page = SAVED_SUBSITITUTE
                 elif self.product_id:
                     self.page = PRODUCT_SEARCH_RESULT
                 elif self.category_id:
                     self.page = CATEGORY_SEARCH_RESULT
+                elif self.input:
+                    self.page = self.search_type
                 else:
                     self.page = HOMEPAGE

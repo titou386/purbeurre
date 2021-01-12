@@ -19,13 +19,14 @@ class Mysql:
             )
         except mysql.connector.Error as e:
             if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logging.error("Something is wrong \
+                logging.error("database.py:Mysql:Something is wrong \
                     with your user name or password")
             elif e.errno == errorcode.ER_BAD_DB_ERROR:
-                logging.error("Database does not exist")
+                logging.error("database.py:Mysql:Database does not exist")
             else:
-                logging.error("Something went wrong at the connection :")
-                logging.error(e)
+                logging.error("database.py:Mysql:Something went \
+                    wrong at the connection :")
+                logging.error("database.py:Mysql:{}".format(e))
             exit(1)
 
         self.cursor = self.cnx.cursor()
@@ -46,18 +47,18 @@ class Mysql:
             self.cursor.execute(sql, values)
         except mysql.connector.Error as e:
             if e.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                logging.error("Table already exists.")
+                logging.error("database.py:execute():Table already exists.")
             else:
-                logging.error(e.msg)
-            logging.error(sql)
+                logging.error("database.py:execute():{}".format(e.msg))
+            logging.error("database.py:execute():{}".format(sql))
             if values:
-                logging.error(values)
+                logging.error("database.py:execute():{}".format(values))
             return False
         else:
-            logging.info("Succeeded")
-            logging.info(sql)
+            logging.info("database.py:execute():Succeeded")
+            logging.info("database.py:execute():{}".format(sql))
             if values:
-                logging.info(values)
+                logging.info("database.py:execute():{}".format(values))
             return True
 
     def apply_structure(self):
@@ -83,6 +84,10 @@ class Mysql:
             return the value on the first column if succeeded.
             return None if failed.
         """
+        r = self.get(table, drop_100g_key(values))
+        if r:
+            return r[0]
+
         sql = "INSERT INTO {} ({}) VALUES ({})"
 
         data_quantity = ', '.join(['%s' for e in range(len(values))])
@@ -108,8 +113,8 @@ class Mysql:
         options(dict): Optionnal named parameters :
             distinc(key): (bool)
 
-            join(key): (str) Name the table (works with on)
-            on(key): (str) Name the table (works with join)
+            join(key): (tuple of str) Name the table (works with on)
+            on(key): (tuple of str) Name the table (works with join)
 
             where(key): (str) The condition
                 like(key): (bool) Generate %s for each item in values
@@ -136,7 +141,9 @@ class Mysql:
             sql = "SELECT {} FROM {}".format(select, table)
 
         if 'join' in options and 'on' in options:
-            sql += " JOIN {} ON {}".format(options['join'], options['on'])
+            for i in range(len(options['join'])):
+                sql += " JOIN {} ON {}".format(options['join'][i],
+                                               options['on'][i])
 
         if 'where' in options:
             sql += " WHERE {}".format(options['where'])
@@ -165,8 +172,8 @@ class Mysql:
         try:
             return self.cursor.fetchall()
         except Exception as e:
-            logging.error(sql, values)
-            logging.error(e.msg)
+            logging.error("database.py:query():{} {}".format(sql, values))
+            logging.error("database.py:query():{}".format(e.msg))
             return None
 
     def get_all(self, table, values):
@@ -220,3 +227,12 @@ class Mysql:
         sql = "DELETE FROM {} WHERE {}".format(table, where)
         self.execute(sql, data)
         self.cnx.commit()
+
+
+def drop_100g_key(values_dict):
+    """Drop all keys with 100g in the name key."""
+    temp = values_dict.copy()
+    for val in values_dict:
+        if val.find("_100g") != -1:
+            temp.pop(val)
+    return temp

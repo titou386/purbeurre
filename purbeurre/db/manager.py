@@ -33,102 +33,7 @@ class Manager:
                     'product_name',
                     'generic_name',
                     'quantity',
-                    'stores',
-                    'countries'
-                    ):
-            try:
-                # Somes tags are missing or empty and can be replaced
-                if key == 'product_name' or key == 'generic_name':
-                    if key not in product_dict:
-                        values[key] = product_dict[key + '_fr']
-                    elif product_dict[key] == '':
-                        values[key] = product_dict[key + '_fr']
-                    else:
-                        values[key] = product_dict[key]
-                else:
-                    values[key] = product_dict[key]
-            except KeyError:
-                pass
-
-        r = self.db.get("product", values)
-        if not r:
-            product_id = self.db.insert("product", values)
-            if product_id:
-                self.insert_nutriments(product_id, product_dict)
-            else:
-                return
-        else:
-            product_id = r[0]
-
-        # Categories insertion
-        try:
-            product_dict['categories'] = product_dict['categories']
-        except KeyError:
-            if "categories_old" in product_dict:
-                product_dict['categories'] = product_dict['categories_old']
-            else:
-                return
-
-        # Some tags are wrongly formatted
-        product_dict['categories'] = product_dict['categories'].\
-            replace('-', ' ')
-        for pattern in (', ', ',', '  ', ' - '):
-            categories_list = product_dict['categories'].split(pattern)
-            if len(categories_list) > 1:
-                break
-
-        for category_name in categories_list:
-            if has_colun(category_name):
-                category_name = category_name[3:]
-            category_id = self.insert_category(category_name)
-            if not category_id:
-                continue
-            self.insert_product_category(product_id, category_id)
-
-    def insert_product_category(self, product_id, category_id):
-        """Insert one association (product, category) in database.
-
-        Parameters:
-            product_id(int/str): Product index
-            category_id(int/str) Category index
-
-        Returns:
-            Nothing
-        """
-        if not self.db.get("product_category", {'product_id': product_id,
-                                                'category_id': category_id}):
-            self.db.insert("product_category", {'product_id': product_id,
-                                                'category_id': category_id})
-
-    def insert_category(self, category_name):
-        """Insert one category in database.
-
-        Parameters:
-            category_name(str): Category should be inserted
-
-        Returns:
-            int: Return an index
-        """
-        r = self.db.get("category", {'name': category_name})
-        if r:
-            return r[0]
-        else:
-            return self.db.insert("category", {'name': category_name})
-
-    def insert_nutriments(self, product_id, product_dict):
-        """Insert one line in nutriments table.
-
-        Parameters:
-            product_id(int/str): Product index
-            product_dict(dict): Contains all tags from
-                openfoodfacts api. Some tags are selected for the
-                product insertion.
-
-        Returns:
-            Nothing
-        """
-        values = {}
-        for key in ('nutriscore_grade',
+                    'nutriscore_grade',
                     'nutriments:energy-kcal_100g',
                     'nutriments:fat_100g',
                     'nutriments:saturated-fat_100g',
@@ -147,19 +52,140 @@ class Manager:
                     'nutriments:proteins_unit',
                     'nutriments:salt_unit'
                     ):
-            if has_colun(key):
-                try:
+            try:
+                # Somes tags are missing or empty and can be replaced
+                if key == 'product_name' or key == 'generic_name':
+                    if key not in product_dict:
+                        values[key] = product_dict[key + '_fr']
+                    elif product_dict[key] == '':
+                        values[key] = product_dict[key + '_fr']
+                    else:
+                        values[key] = product_dict[key]
+                    values[key] = values[key].replace('\n', ' ')
+                elif has_colun(key):
                     key1, key2 = key.split(':')
-                    values[sql_formater(key2)] = product_dict[key1][key2]
-                except KeyError:
-                    pass
-            else:
-                try:
+                    values[sql(key2)] = product_dict[key1][key2]
+                else:
                     values[key] = product_dict[key]
-                except KeyError:
-                    pass
-        values['product_id'] = product_id
-        self.db.insert("nutriments", values)
+            except KeyError:
+                pass
+
+        product_id = self.db.insert("product", values)
+        if not product_id:
+            return
+
+        # Categories, countries and stores insertion.
+        for key in ("categories", "categories_old", "countries", "stores"):
+            try:
+                # Some values in key are wrongly formatted
+                product_dict[key] = product_dict[key].replace('\n', ' ')
+                for pattern in (', ', ',', '  ', ' - '):
+                    val_list = product_dict[key].split(pattern)
+                    if len(val_list) > 1:
+                        break
+
+                # Re-check every items list
+                copy = val_list.copy()
+                for val in copy:
+                    for pattern in (', ', ',', '  ', ' - '):
+                        tmp = val.split(pattern)
+                        if len(tmp) > 1:
+                            val_list.remove(val)
+                            for t in tmp:
+                                val_list.append(t)
+                            break
+
+                for value in val_list:
+                    if has_colun(value):
+                        value = value[3:]
+                    if key == "categories" or key == "categories_old":
+                        index = self.insert_category(value)
+                        if index:
+                            self.insert_product_category(product_id, index)
+                    elif key == "countries":
+                        index = self.insert_country(value)
+                        if index:
+                            self.insert_product_country(product_id, index)
+                    elif key == "stores":
+                        index = self.insert_store(value)
+                        if index:
+                            self.insert_product_store(product_id, index)
+            except KeyError:
+                pass
+
+    def insert_product_category(self, product_id, category_id):
+        """Insert one association (product, category) in database.
+
+        Parameters:
+            product_id(int/str): Product index
+            category_id(int/str): Category index
+
+        Returns:
+            Nothing
+        """
+        if not self.db.get("product_category", {'product_id': product_id,
+                                                'category_id': category_id}):
+            self.db.insert("product_category", {'product_id': product_id,
+                                                'category_id': category_id})
+
+    def insert_category(self, category_name):
+        """Insert one category in database.
+
+        Parameters:
+            category_name(str): Category should be inserted
+
+        Returns:
+            int: Return an index
+        """
+        return self.db.insert("category", {'name': category_name})
+
+    def insert_product_country(self, product_id, country_id):
+        """Insert one association (product, country) in database.
+
+        Parameters:
+            product_id(int/str): Product index
+            country_id(int/str): Country index
+
+        Returns:
+            Nothing
+        """
+        self.db.insert("product_country", {'product_id': product_id,
+                                           'country_id': country_id})
+
+    def insert_country(self, country_name):
+        """Insert one country in database.
+
+        Parameters:
+            country_name(str): Category should be inserted
+
+        Returns:
+            int: Return an index
+        """
+        return self.db.insert("country", {'name': country_name})
+
+    def insert_product_store(self, product_id, store_id):
+        """Insert one association (product, store) in database.
+
+        Parameters:
+            product_id(int/str): Product index
+            store_id(int/str) Store index
+
+        Returns:
+            Nothing
+        """
+        self.db.insert("product_store", {'product_id': product_id,
+                                         'store_id': store_id})
+
+    def insert_store(self, store_name):
+        """Insert one store in database.
+
+        Parameters:
+            store_name(str): Store should be inserted
+
+        Returns:
+            int: Return an index
+        """
+        return self.db.insert("store", {'name': store_name})
 
     def search_category_name(self, search):
         """Search any patten in category name.
@@ -202,13 +228,13 @@ class Manager:
         sql = """
 SELECT product_category.product_id
 FROM product_category
-JOIN nutriments ON nutriments.product_id = product_category.product_id
+JOIN product ON product.id = product_category.product_id
 WHERE product_category.category_id IN ({})
     AND NOT product_category.product_id=%s
-    AND nutriments.nutriscore_grade <= (
-        SELECT nutriscore_grade from nutriments where product_id=%s)
-    AND nutriments.nova_group <= (
-        SELECT nova_group from nutriments where product_id=%s)
+    AND product.nutriscore_grade <= (
+        SELECT nutriscore_grade from product where id=%s)
+    AND product.nova_group <= (
+        SELECT nova_group from product where id=%s)
 """
 
         data_quantity = ', '.join(['%s' for e in range(len(cat))])
@@ -221,8 +247,9 @@ WHERE product_category.category_id IN ({})
         try:
             prod = [p[0] for p in self.db.cursor.fetchall()]
         except Exception as e:
-            logging.error(sql)
-            logging.error(e.msg)
+            logging.error('manager.py:get_product_subtitution:{}'.format(sql))
+            logging.error('manager.py:get_product_subtitution:{}'.
+                          format(e.msg))
             return None
 
         if not prod:
@@ -241,10 +268,10 @@ WHERE product_category.category_id IN ({})
         while not occurence[index]:
             index -= 1
 
-        result = [p[0] for p in self.db.query('nutriments',
+        result = [p[0] for p in self.db.query('product',
                                               occurence[index],
-                                              select='product_id',
-                                              where='product_id',
+                                              select='id',
+                                              where='id',
                                               inside=True,
                                               order='nutriscore_grade, \
                                               nova_group',
@@ -264,11 +291,11 @@ WHERE product_category.category_id IN ({})
         results = self.db.query("product",
                                 (category_id,),
                                 select="product.id, product.product_name",
-                                join="product_category",
-                                on="product.id = product_category.product_id",
+                                join=("product_category",),
+                                on=("product.id=product_category.product_id",),
                                 where="product_category.category_id=%s")
 
-        return self.kill_duplicate_product_name(results)
+        return self.del_duplicate_product_name(results)
 
     def search_product_name(self, search):
         """Search any patten in product name.
@@ -278,12 +305,12 @@ WHERE product_category.category_id IN ({})
         Return a list of tuples (id, name)
         """
         value = ("%{}%".format(search),)
-        return self.kill_duplicate_product_name(self.db.query("product", value,
-                                                select="id, product_name",
-                                                where="product_name",
-                                                like=True))
+        return self.del_duplicate_product_name(self.db.query("product", value,
+                                               select="id, product_name",
+                                               where="product_name",
+                                               like=True))
 
-    def kill_duplicate_product_name(self, products):
+    def del_duplicate_product_name(self, products):
         """Elimine duplicate product name.
 
         Parameters:
@@ -317,21 +344,25 @@ product.id,
 product.product_name,
 product.generic_name,
 product.quantity,
-product.stores,
-product.countries,
-nutriments.energy_kcal_100g, nutriments.energy_kcal_unit,
-nutriments.fat_100g, nutriments.fat_unit,
-nutriments.saturated_fat_100g, nutriments.saturated_fat_unit,
-nutriments.carbohydrates_100g, nutriments.carbohydrates_unit,
-nutriments.sugars_100g, nutriments.sugars_unit,
-nutriments.fiber_100g, nutriments.fiber_unit,
-nutriments.proteins_100g, nutriments.proteins_unit,
-nutriments.salt_100g, nutriments.salt_unit,
-nutriments.nutriscore_grade,
-nutriments.nova_group,
+group_concat(DISTINCT store.name SEPARATOR ', '),
+group_concat(DISTINCT country.name SEPARATOR ', '),
+product.energy_kcal_100g, product.energy_kcal_unit,
+product.fat_100g, product.fat_unit,
+product.saturated_fat_100g, product.saturated_fat_unit,
+product.carbohydrates_100g, product.carbohydrates_unit,
+product.sugars_100g, product.sugars_unit,
+product.fiber_100g, product.fiber_unit,
+product.proteins_100g, product.proteins_unit,
+product.salt_100g, product.salt_unit,
+product.nutriscore_grade,
+product.nova_group,
 product.code""",
-                             join="nutriments",
-                             on="product.id = nutriments.product_id",
+                             join=("product_store", "store",
+                                   "product_country", "country"),
+                             on=("product.id=product_store.product_id",
+                                 "product_store.store_id=store.id",
+                                 "product.id=product_country.product_id",
+                                 "product_country.country_id=country.id"),
                              where="product.id=%s")[0]
 
     def save_substitute(self, product_id, substitute_id):
@@ -350,18 +381,13 @@ product.code""",
 
         Return a list of tuples (id prod, name prod, id sub, name sub)
         """
-        sql = """
-SELECT b.id, b.product_name, c.id, c.product_name
-FROM substitution a
-JOIN product b ON a.product_id = b.id
-JOIN product c ON a.subs_product_id = c.id"""
-        self.db.execute(sql)
-        try:
-            return self.db.cursor.fetchall()
-        except Exception as e:
-            logging.error(sql)
-            logging.error(e.msg)
-            return None
+        return self.db.query("substitution a", None,
+                             select="b.id, b.product_name, \
+                                     c.id, c.product_name",
+                             join=("product b", "product c"),
+                             on=("a.product_id = b.id",
+                                 "subs_product_id = c.id")
+                             )
 
 
 def has_colun(text):
@@ -372,7 +398,7 @@ def has_colun(text):
     return False if text.find(':') == -1 else True
 
 
-def sql_formater(text):
+def sql(text):
     """Replace some characters for sql language.
 
     Returns:
