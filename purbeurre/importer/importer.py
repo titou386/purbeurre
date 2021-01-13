@@ -4,7 +4,11 @@ from purbeurre.importer.api import OpenFoodFacts
 
 
 def main():
-    """Create db main."""
+    """Create db main.
+
+    Retruns:
+        Nothing
+    """
     manager = Manager()
     manager.create_db()
 

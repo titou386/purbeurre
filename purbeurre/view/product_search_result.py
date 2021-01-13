@@ -1,5 +1,6 @@
 """Product search class page."""
 import os
+import platform
 from purbeurre.view.common import GenericFormatting
 from purbeurre.constants import \
     HOMEPAGE,                   \
@@ -13,7 +14,7 @@ class ProductSearchResultView(GenericFormatting):
 
     def display(self, results):
         """Display the page."""
-        os.system('clear')
+        os.system("cls" if platform.system() == "Windows" else "clear")
         print("# Page de résultat des produits :\n")
         self.format_results(results)
 

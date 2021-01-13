@@ -1,5 +1,6 @@
 """Homepage."""
 import os
+import platform
 from purbeurre.constants import \
     PRODUCT_SEARCH,             \
     CATEGORY_SEARCH,            \
@@ -13,7 +14,7 @@ class HomePageView:
 
     def display(self):
         """Display the page."""
-        os.system('clear')
+        os.system("cls" if platform.system() == "Windows" else "clear")
         print("""
 # Page d'accueil
 
@@ -22,7 +23,7 @@ Bienvenue
 Choisissez une option :
 
 1 - Rechercher un produit par nom
-2 - Rechercher une categorie
+2 - Rechercher une catégorie
 3 - Afficher mes substituts sauvegardés
 q - Quitter
 

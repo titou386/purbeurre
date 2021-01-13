@@ -1,6 +1,6 @@
 """Product search page."""
 import os
-
+import platform
 from purbeurre.constants import \
     HOMEPAGE,                   \
     PRODUCT_SEARCH_RESULT,      \
@@ -12,7 +12,7 @@ class ProductSearchView:
 
     def display(self):
         """Display the page."""
-        os.system('clear')
+        os.system("cls" if platform.system() == "Windows" else "clear")
         print("""
 # Page de recherche de produits
 

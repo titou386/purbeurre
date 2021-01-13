@@ -1,5 +1,6 @@
 """Category search result page."""
 import os
+import platform
 from purbeurre.view.common import GenericFormatting
 from purbeurre.constants import \
     HOMEPAGE,                   \
@@ -13,8 +14,8 @@ class CategorySearchResultView(GenericFormatting):
 
     def display(self, results):
         """Display the page."""
-        os.system('clear')
-        print("# Page de résultat des catégories :\n")
+        os.system("cls" if platform.system() == "Windows" else "clear")
+        print("# Page de résultats des catégories :\n")
         self.format_results(results)
 
     def get_next_page(self, max):

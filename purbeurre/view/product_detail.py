@@ -1,5 +1,6 @@
 """Product detail pages."""
 import os
+import platform
 from purbeurre.constants import \
     HOMEPAGE,                   \
     PRODUCT_DETAIL,             \
@@ -19,7 +20,7 @@ class ProductDetailView:
             substitution(list): a list (int/str)
             saved(bool): If True, display a message
         """
-        os.system('clear')
+        os.system("cls" if platform.system() == "Windows" else "clear")
         print("# Page de détail du produit :")
         prod_card(product)
 

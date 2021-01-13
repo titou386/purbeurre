@@ -1,5 +1,6 @@
 """Saved substitution pages."""
 import os
+import platform
 from purbeurre.constants import \
     HOMEPAGE,                   \
     SAVED_SUBSITITUTE,          \
@@ -12,7 +13,7 @@ class SavedSubstituteView:
 
     def display(self, results=None):
         """Display the page."""
-        os.system('clear')
+        os.system("cls" if platform.system() == "Windows" else "clear")
         print("""
 # Page des subtituts sauvegardés
 """)
@@ -33,7 +34,7 @@ class SavedSubstituteView:
                 print("s - Supprimer un substitut")
                 print("d - Detail d'un substitut")
             option = input("option? ")
-            if option == "h":
+            if option == 'h':
                 return (HOMEPAGE, None)
             elif option == 's' or option == 'd' and max > 0:
                 index = input("Numéro? ")
@@ -47,7 +48,7 @@ class SavedSubstituteView:
                 except (ValueError, TypeError):
                     pass
 
-            elif option == "q":
+            elif option == 'q':
                 return (EXIT, None)
             else:
                 return (SAVED_SUBSITITUTE, None)
