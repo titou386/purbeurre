@@ -16,10 +16,10 @@ class OpenFoodFacts:
     def get_categories(self):
         """Method get_categories.
 
-        Retrieve from the API and fill 'categories' variable with
+        Retrieve from the API and fill 'self.categories' variable with
         a decreasing ordered list.
         Returns:
-            Nothing (fill up self.categories)
+            Nothing (fill up self.categories list)
         """
         self.categories = [None for e in range(MAX_CATEGORIES)]
 
@@ -37,7 +37,8 @@ class OpenFoodFacts:
     def get_products(self):
         """Method get_products.
 
-        Retrieve from the API and fill 'products' variable with a list.
+        Retrieve x(see constants.py for the number) products of the category
+        contained in the first element of 'self.categories' list.
         Returns:
             Dict value if it succeeded
             None if it failed

@@ -35,7 +35,7 @@ class SavedSubstituteView:
                 print("d - Detail d'un substitut")
             option = input("option? ")
             if option == 'h':
-                return (HOMEPAGE, None)
+                return (HOMEPAGE, -1)
             elif option == 's' or option == 'd' and max > 0:
                 index = input("Numéro? ")
                 try:
@@ -49,6 +49,6 @@ class SavedSubstituteView:
                     pass
 
             elif option == 'q':
-                return (EXIT, None)
+                return (EXIT, -1)
             else:
-                return (SAVED_SUBSITITUTE, None)
+                return (SAVED_SUBSITITUTE, -1)

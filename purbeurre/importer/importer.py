@@ -4,7 +4,7 @@ from purbeurre.importer.api import OpenFoodFacts
 
 
 def main():
-    """Create db main.
+    """Create db and fill up MySQL database with the OpenFoodFats API.
 
     Retruns:
         Nothing

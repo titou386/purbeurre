@@ -176,23 +176,23 @@ class Mysql:
             logging.error("database.py:query():{}".format(e.msg))
             return None
 
-    def get_all(self, table, values):
-        """Query database and return all results.
-
-        Parameters:
-            table(str): Select the table in the database.
-            values(dict):
-                key: column name in the table.
-
-        Returns:
-            return a list of lists if succeeded.
-                first list level is each database line matching
-                second list level is each column in table
-            return None if failed.
-        """
-        data = tuple([values[key] for key in values])
-        where = " AND ".join([key + "=%s" for key in values])
-        return self.query(table, data, where=where)
+#    def get_all(self, table, values):
+#        """Query database and return all results.
+#
+#        Parameters:
+#            table(str): Select the table in the database.
+#            values(dict):
+#                key: column name in the table.
+#
+#        Returns:
+#            return a list of lists if succeeded.
+#                first list level is each database line matching
+#                second list level is each column in table
+#            return None if failed.
+#        """
+#        data = tuple([values[key] for key in values])
+#        where = " AND ".join([key + "=%s" for key in values])
+#        return self.query(table, data, where=where)
 
     def get(self, table, values):
         """Query database and return one result.

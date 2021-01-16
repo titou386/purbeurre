@@ -74,6 +74,30 @@ you have this page and you can back at this page at any moment in the applicatio
 
 
     Produit? 
+#### Product search results ( ex: coca )
+    # Page de résultat des produits :
+
+      0- Coca-Cola Classic             18- coca cola light taste                   
+      1- Coca-Cola Zero 330 ml         19- Coca Cola Zero Zucker                   
+      2- Coca-Cola Goût Original       20- Coca Cola 450 ml                        
+      3- Coca-Cola 1 l                 21- Coca-Cola 2 L                           
+      4- Coca-Cola zero® sans sucres   22- Coca Cola zéro sans caféine             
+      5- Coca-cola 330 ml              23- Coca-cola light 1 l                     
+      6- Coca Zéro                     24- Coca-Cola Cherry 330 ml                 
+      7- Coca Cola zéro 330 ml         25- Coca-Cola Saveur Framboise Zéro Sucres  
+      8- Coca Cola® zéro sucres        26- Coca Cola 2 l                           
+      9- Coca-Cola 2 L                 27- Coca-Cola cherry 33 cl                  
+     10- Coca-Cola 50 cl               28- Coca Cola Cherry 500 ml                 
+     11- Coca-Cola Zero 50 cl          29- Coca-Cola 0,25 l                        
+     12- Coca-Cola Light 330 ml        30- Coca-Cola 330 ml                        
+     13- Coca-Cola 50 cl e             31- Coca cola cherry 1.25L                  
+     14- Coca-Cola Zero 2 l            32- Coca cola light                         
+     15- Coca cola 1,25L               33- Coca-Cola Energy                        
+     16- coca cola 25cl                34- Coca Cola zéro 33 cl                    
+     17- Coca-cola Zéro Sans caféine   35- Coca-Cola Lemon sans sucres             
+ 
+    h - Page d'accueil   r - retour   q - Quitter
+    Choix? 
 #### Product search by category
     # Page de recherche de categories
 

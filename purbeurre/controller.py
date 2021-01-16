@@ -119,9 +119,9 @@ class Controller:
                 view = SavedSubstituteView()
                 view.display(results)
                 self.page, value = view.get_next_page(len(results))
-                if value or value == 0 and self.page == SAVED_SUBSITITUTE:
+                if value >= 0 and self.page == SAVED_SUBSITITUTE:
                     self.manager.delete_substitute(results[value][0])
-                elif value or value == 0 and self.page == DETAILED_SUBSTITUTE:
+                elif value >= 0 and self.page == DETAILED_SUBSTITUTE:
                     self.product_id = results[value][0]
                     self.substitute_id = results[value][2]
 

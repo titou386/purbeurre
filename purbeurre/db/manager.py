@@ -220,16 +220,12 @@ class Manager:
         Returns:
             int: Return a product index for the substitution.
         """
-        cat = [c[0] for c in self.db.query('product_category',
-                                           (product_id,),
-                                           select='category_id',
-                                           where='product_id=%s')]
-
         sql = """
 SELECT product_category.product_id
 FROM product_category
 JOIN product ON product.id = product_category.product_id
-WHERE product_category.category_id IN ({})
+WHERE product_category.category_id IN ((
+    SELECT category_id FROM product_category WHERE product_id=%s))
     AND NOT product_category.product_id=%s
     AND product.nutriscore_grade <= (
         SELECT nutriscore_grade from product where id=%s)
@@ -237,13 +233,7 @@ WHERE product_category.category_id IN ({})
         SELECT nova_group from product where id=%s)
 """
 
-        data_quantity = ', '.join(['%s' for e in range(len(cat))])
-        sql = sql.format(data_quantity)
-        cat.append(product_id)
-        cat.append(product_id)
-        cat.append(product_id)
-
-        self.db.execute(sql, cat)
+        self.db.execute(sql, (product_id, product_id, product_id, product_id))
         try:
             prod = [p[0] for p in self.db.cursor.fetchall()]
         except Exception as e:
@@ -258,18 +248,18 @@ WHERE product_category.category_id IN ({})
         while prod.count(product_id):
             prod.remove(product_id)
 
-        occurence = [[] for c in cat]
+        occurrence = [[] for c in range(15)]
         for p in prod:
-            occurence[prod.count(p) - 1].append(p)
+            occurrence[prod.count(p) - 1].append(p)
             while prod.count(p):
                 prod.remove(p)
 
-        index = len(occurence) - 1
-        while not occurence[index]:
+        index = len(occurrence) - 1
+        while not occurrence[index]:
             index -= 1
 
         result = [p[0] for p in self.db.query('product',
-                                              occurence[index],
+                                              occurrence[index],
                                               select='id',
                                               where='id',
                                               inside=True,
