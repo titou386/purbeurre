@@ -7,5 +7,6 @@ def main():
     control = purbeurre.controller.Controller()
     control.run()
 
+
 if __name__ == '__main__':
     main()
