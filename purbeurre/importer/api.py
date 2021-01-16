@@ -9,22 +9,17 @@ class OpenFoodFacts:
     """Retrieves data from the Open Food Facts API."""
 
     def __init__(self):
-        """Open Food Facts' contructor require 2 arguments.
-
-        :param int nb_cat:
-            Defined how many categories should be retrieved
-
-        :param int nb_prod:
-            Defined how many products in each category should be retrieved
-        """
+        """Open Food Facts' contructor require 2 arguments."""
         self.categories = []
         self.get_categories()
 
     def get_categories(self):
         """Method get_categories.
 
-        Retrieve from the API and fill 'categories' variable with
+        Retrieve from the API and fill 'self.categories' variable with
         a decreasing ordered list.
+        Returns:
+            Nothing (fill up self.categories list)
         """
         self.categories = [None for e in range(MAX_CATEGORIES)]
 
@@ -42,10 +37,13 @@ class OpenFoodFacts:
     def get_products(self):
         """Method get_products.
 
-        Retrieve from the API and fill 'products' variable with a list.
+        Retrieve x(see constants.py for the number) products of the category
+        contained in the first element of 'self.categories' list.
+        Returns:
+            Dict value if it succeeded
+            None if it failed
         """
-#        data = []
-        if self.categories:
+        try:
             cat = self.categories.pop(0)
             payload = {
                 'action': 'process',
@@ -62,15 +60,25 @@ class OpenFoodFacts:
             r = requester('https://world.openfoodfacts.org/cgi/search.pl',
                           params=payload)
 
-#            data.append(r['products'])
-#        return [prod for cat in data for prod in cat]
             return r['products']
-        else:
+        except(IndexError, TypeError) as e:
+            logging.error('api.py:get_products():{}'.format(e))
             return None
 
 
 def requester(url, **kwargs):
-    """Similar to requests.get."""
+    """Similar to requests.get.
+
+    Parameters:
+        url(str): url with http://
+
+        parameter named:
+            params(key)(str) take same paramaters than requests
+
+    Returns:
+        dict: json converted
+        None if it failed
+    """
     if ('params' in kwargs):
         r = requests.get(url, kwargs['params'])
     else:
@@ -79,7 +87,8 @@ def requester(url, **kwargs):
     if r.ok:
         return json.loads(r.text)
     else:
-        logging.error('Une erreur s\'est produite \
+        logging.error('api.py:requester():Une erreur s\'est produite \
 lors de la récupération des données')
-        logging.error('Code erreur HTTP : {}'.format(r.status_code))
+        logging.error('api.py:requester():Code erreur HTTP : {}'.
+                      format(r.status_code))
         return None
